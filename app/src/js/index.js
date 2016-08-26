@@ -1,8 +1,7 @@
 $(function() {
-
     function application() {
 
-        this.canvas = $('<canvas />');
+        this.canvas = $('<canvas/>', {id: 'canvas'}).get(0);
         this.ctx = this.canvas.getContext("2d");
         this.canvas.width = $(window).innerWidth();
         this.canvas.height = $(window).innerHeight();
@@ -54,6 +53,7 @@ $(function() {
         }
 
         function decreasePixel(pix, channel) {
+          console.log('decreasing Pixel on channel ' + channel);
             var decValue = 125;
             for (var i = 0; i < pix.length; i += 4) {
                 pix[i + channel] = Math.max(0, pix[i + channel] - decValue);
