@@ -1,12 +1,15 @@
 $(function() {
     function application() {
 
-        this.canvas = $('<canvas/>', {id: 'canvas'}).get(0);
+        this.$canvas = $('<canvas/>', { id: 'canvas' });
+        // this.$canvas.appendTo($('body'));
+        this.canvas = this.$canvas.get(0);
         this.ctx = this.canvas.getContext("2d");
         this.canvas.width = $(window).innerWidth();
         this.canvas.height = $(window).innerHeight();
         this.config = {
             clickDiameter: 10,
+            decValue: 125,
         }
 
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -14,7 +17,6 @@ $(function() {
         var self = this;
 
         $(window).on('mousemove', function(e) {
-
             var mouseX = e.clientX,
                 mouseY = e.clientY;
 
@@ -23,40 +25,35 @@ $(function() {
             // var prevColor = this.ctx.getImageDate
             self.ctx.putImageData(imgd, mouseX, mouseY);
         });
+        this.c
 
         $(window).on('click', function(e) {
-
             var mouseX = e.clientX,
                 mouseY = e.clientY;
 
             var cD = self.config.clickDiameter;
-            var topLeftX = mouseX - (cD / 2);
-            var topLeftY = mouseY - (cD / 2);
+            var topLeftX = mouseX - (cD / 2),
+                topLeftY = mouseY - (cD / 2);
 
             var imgd = self.ctx.getImageData(topLeftX, topLeftY, cD, cD);
-            var pix = decreasePixel(imgd.data, 1);
+            var pix = decreaseColorChannel(imgd.data, 1);
             // var prevColor = this.ctx.getImageDate
             self.ctx.putImageData(imgd, topLeftX, topLeftY);
         });
 
+        // pix = area of pixels
         function markHover(pix, channel) {
-            if (channel == 0) {
-                decreasePixel(pix, 1);
-                decreasePixel(pix, 2);
-            } else if (channel == 1) {
-                decreasePixel(pix, 0);
-                decreasePixel(pix, 2);
-            } else if (channel == 2) {
-                decreasePixel(pix, 0);
-                decreasePixel(pix, 1);
+            for (var i = 0; i < pix.length; i += 4) {
+                for (var j = 0; j < 3; j++) {
+                    if (channel == j) continue;
+                    decreaseColorChannel(pix, j);
+                }
             }
         }
 
-        function decreasePixel(pix, channel) {
-          console.log('decreasing Pixel on channel ' + channel);
-            var decValue = 125;
+        function decreaseColorChannel(pix, channel) {
             for (var i = 0; i < pix.length; i += 4) {
-                pix[i + channel] = Math.max(0, pix[i + channel] - decValue);
+                pix[i + channel] = Math.max(0, pix[i + channel] - this.config.decValue);
             }
             return pix;
         }
@@ -71,15 +68,14 @@ $(function() {
         }
 
         function flashCanvas(col) {
-            console.log("flashing");
             var imgd = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
             var pix = imgd.data;
 
             for (var i = 0; i < pix.length; i++) {
-                pix[i  ] = col.r;
-                pix[i+1] = col.g;
-                pix[i+2] = col.b;
-                pix[i+3] = col.a;
+                pix[i    ] = col.r;
+                pix[i + 1] = col.g;
+                pix[i + 2] = col.b;
+                pix[i + 3] = col.a;
             }
 
             this.ctx.putImageData(imgd, 0, 0);
